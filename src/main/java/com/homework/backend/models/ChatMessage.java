@@ -1,5 +1,6 @@
 package com.homework.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class ChatMessage {
     private Long id;
 
     @ManyToOne
+    @JsonIgnore
     private Conversation conversation;
 
     @ManyToOne

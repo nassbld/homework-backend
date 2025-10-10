@@ -4,6 +4,7 @@ package com.homework.backend.services;
 import com.homework.backend.models.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,10 +41,15 @@ public class JwtService {
     }
 
     public String generateToken(User user) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().name());
-        claims.put("firstName", user.getFirstName());
-        return buildToken(claims, user.getEmail());
+        return Jwts.builder()
+                .claim("firstName", user.getFirstName())
+                .claim("role", user.getRole().name())
+                .claim("id", user.getId())  // ⚠️ AJOUTE L'ID
+                .subject(user.getEmail())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
+                .signWith(getSignInKey())
+                .compact();
     }
 
     private String buildToken(Map<String, Object> extraClaims, String subject) {
