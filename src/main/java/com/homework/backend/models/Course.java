@@ -33,11 +33,14 @@ public class Course {
     @Column(nullable = false)
     private Category category;
 
-    @Column(nullable = false)
-    private BigDecimal pricePerHour;
+    @Column(name = "price_per_course", nullable = false)
+    private BigDecimal price;
 
     @Column(nullable = false)
     private String city;
+
+    @Column(name = "course_date_time")
+    private LocalDateTime courseDateTime;
 
     @Column(name = "duration")
     private Integer duration;

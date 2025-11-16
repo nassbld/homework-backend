@@ -1,6 +1,10 @@
 package com.homework.backend.config;
 
+import com.homework.backend.config.props.FrontendProperties;
+import com.homework.backend.config.props.JwtProperties;
+import com.homework.backend.config.props.StripeProperties;
 import com.homework.backend.repositories.UserRepository;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableConfigurationProperties({FrontendProperties.class, JwtProperties.class, StripeProperties.class})
 public class ApplicationConfig {
 
     @Bean

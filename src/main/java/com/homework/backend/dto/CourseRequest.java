@@ -1,12 +1,10 @@
 package com.homework.backend.dto;
 
 import com.homework.backend.models.Category;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public record CourseRequest(
         @NotEmpty(message = "Le titre ne peut pas être vide")
@@ -19,7 +17,11 @@ public record CourseRequest(
 
         @NotNull(message = "Le prix ne peut pas être nul")
         @DecimalMin(value = "0.0", inclusive = false, message = "Le prix doit être positif")
-        BigDecimal pricePerHour,
+        BigDecimal price,
+
+        @NotNull(message = "La date du cours est obligatoire")
+        @Future(message = "La date du cours doit être dans le futur")
+        LocalDateTime courseDateTime,
 
         @NotEmpty(message = "La ville ne peut pas être vide")
         String city,

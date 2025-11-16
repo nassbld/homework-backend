@@ -40,6 +40,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             newUser.setLastName((String) attributes.get("family_name"));
             newUser.setRole(Role.STUDENT);
             newUser.setPassword(null);
+            newUser.setVerifiedEmail(true); // OAuth2 emails are pre-verified
 
             return userRepository.saveAndFlush(newUser);
         });

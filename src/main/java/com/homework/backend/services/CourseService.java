@@ -36,7 +36,8 @@ public class CourseService {
                 .title(courseRequest.title())
                 .description(courseRequest.description())
                 .category(courseRequest.category())
-                .pricePerHour(courseRequest.pricePerHour())
+                .price(courseRequest.price())
+                .courseDateTime(courseRequest.courseDateTime())
                 .city(courseRequest.city())
                 .teacher(currentUser)
                 .duration(courseRequest.duration())
@@ -47,11 +48,11 @@ public class CourseService {
     }
 
     @Transactional(readOnly = true)
-    public Page<Course> searchCourses(String title, Category category, String city, Pageable pageable) {
+    public Page<Course> searchCourses(String keyword, Category category, String city, Pageable pageable) {
         Specification<Course> spec = Specification.allOf();
 
-        if (title != null && !title.isEmpty()) {
-            spec = spec.and(CourseSpecification.titleContains(title));
+        if (keyword != null && !keyword.isEmpty()) {
+            spec = spec.and(CourseSpecification.matchesKeyword(keyword));
         }
         if (category != null) {
             spec = spec.and(CourseSpecification.hasCategory(category));
@@ -86,7 +87,8 @@ public class CourseService {
         courseToUpdate.setTitle(courseRequest.title());
         courseToUpdate.setDescription(courseRequest.description());
         courseToUpdate.setCategory(courseRequest.category());
-        courseToUpdate.setPricePerHour(courseRequest.pricePerHour());
+        courseToUpdate.setPrice(courseRequest.price());
+        courseToUpdate.setCourseDateTime(courseRequest.courseDateTime());
         courseToUpdate.setCity(courseRequest.city());
         courseToUpdate.setDuration(courseRequest.duration());
         courseToUpdate.setMaxStudents(courseRequest.maxStudents());

@@ -34,6 +34,7 @@ public class User implements UserDetails {
     private String email;
 
     @Column(name = "verified_email")
+    @Builder.Default
     private Boolean verifiedEmail = false;
 
     @Column(nullable = false)
@@ -80,5 +81,7 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() { 
+        return verifiedEmail != null && verifiedEmail; 
+    }
 }

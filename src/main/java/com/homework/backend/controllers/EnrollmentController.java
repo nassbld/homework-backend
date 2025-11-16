@@ -1,6 +1,7 @@
 package com.homework.backend.controllers;
 
 import com.homework.backend.dto.EnrollmentRequest;
+import com.homework.backend.dto.EnrollmentResponse;
 import com.homework.backend.models.Enrollment;
 import com.homework.backend.models.User;
 import com.homework.backend.services.EnrollmentService;
@@ -21,15 +22,15 @@ public class EnrollmentController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('STUDENT')")
-    public ResponseEntity<Enrollment> enrollInCourse(@RequestBody EnrollmentRequest request, @AuthenticationPrincipal User student) {
+    public ResponseEntity<EnrollmentResponse> enrollInCourse(@RequestBody EnrollmentRequest request, @AuthenticationPrincipal User student) {
         Enrollment newEnrollment = enrollmentService.createEnrollment(request.courseId(), student);
-        return ResponseEntity.ok(newEnrollment);
+        return ResponseEntity.ok(enrollmentService.toResponse(newEnrollment));
     }
 
     @GetMapping("/my-courses")
     @PreAuthorize("hasAuthority('STUDENT')")
-    public ResponseEntity<List<Enrollment>> getMyCourses(@AuthenticationPrincipal User student) {
-        List<Enrollment> enrollments = enrollmentService.getEnrollmentsForStudent(student.getId());
+    public ResponseEntity<List<EnrollmentResponse>> getMyCourses(@AuthenticationPrincipal User student) {
+        List<EnrollmentResponse> enrollments = enrollmentService.getEnrollmentsForStudent(student.getId());
         return ResponseEntity.ok(enrollments);
     }
 }

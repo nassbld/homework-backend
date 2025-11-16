@@ -1,5 +1,6 @@
 package com.homework.backend.services;
 
+import com.homework.backend.dto.EnrollmentResponse;
 import com.homework.backend.models.Course;
 import com.homework.backend.models.Enrollment;
 import com.homework.backend.models.EnrollmentStatus;
@@ -21,7 +22,12 @@ public class EnrollmentService {
 
     @Transactional
     public Enrollment createEnrollment(Long courseId, User student) {
-        if (enrollmentRepository.existsByStudentIdAndCourseId(student.getId(), courseId)) {
+        boolean hasActiveEnrollment = enrollmentRepository.existsByStudentIdAndCourseIdAndStatusIn(
+                student.getId(),
+                courseId,
+                List.of(EnrollmentStatus.ACTIVE, EnrollmentStatus.COMPLETED)
+        );
+        if (hasActiveEnrollment) {
             throw new IllegalStateException("Vous êtes déjà inscrit à ce cours.");
         }
 
@@ -33,7 +39,10 @@ public class EnrollmentService {
         }
 
         if (course.getMaxStudents() != null) {
-            long currentEnrollmentCount = enrollmentRepository.countByCourseId(courseId);
+            long currentEnrollmentCount = enrollmentRepository.countByCourseIdAndStatusIn(
+                    courseId,
+                    List.of(EnrollmentStatus.ACTIVE)
+            );
             if (currentEnrollmentCount >= course.getMaxStudents()) {
                 throw new IllegalStateException("Le cours est complet. Impossible de s'inscrire.");
             }
@@ -48,7 +57,46 @@ public class EnrollmentService {
         return enrollmentRepository.save(enrollment);
     }
 
-    public List<Enrollment> getEnrollmentsForStudent(Long studentId) {
-        return enrollmentRepository.findByStudentId(studentId);
+    public List<EnrollmentResponse> getEnrollmentsForStudent(Long studentId) {
+        return enrollmentRepository.findByStudentId(studentId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public EnrollmentResponse toResponse(Enrollment enrollment) {
+        if (enrollment == null) {
+            return null;
+        }
+
+        Course course = enrollment.getCourse();
+        User teacher = course.getTeacher();
+
+        return new EnrollmentResponse(
+                enrollment.getId(),
+                enrollment.getEnrolledAt(),
+                enrollment.getStatus(),
+                new EnrollmentResponse.CourseSummary(
+                        course.getId(),
+                        course.getTitle(),
+                        course.getDescription(),
+                        course.getCategory(),
+                        course.getPrice(),
+                        course.getCity(),
+                        course.getCourseDateTime(),
+                        course.getDuration(),
+                        course.getMaxStudents(),
+                        course.getEnrolledStudentsCount(),
+                        course.getCreatedAt(),
+                        new EnrollmentResponse.TeacherSummary(
+                                teacher.getId(),
+                                teacher.getFirstName(),
+                                teacher.getLastName(),
+                                teacher.getEmail(),
+                                teacher.getBio(),
+                                teacher.getRole()
+                        )
+                )
+        );
     }
 }

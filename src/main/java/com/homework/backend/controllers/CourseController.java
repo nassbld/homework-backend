@@ -44,12 +44,15 @@ public class CourseController {
 
     @GetMapping
     public ResponseEntity<Page<Course>> searchCourses(
-            @RequestParam(required = false) String title,
+            @RequestParam(required = false, name = "keyword") String keyword,
+            @RequestParam(required = false, name = "title") String legacyTitle,
             @RequestParam(required = false) Category category,
             @RequestParam(required = false) String city,
             Pageable pageable) {
 
-        Page<Course> courses = courseService.searchCourses(title, category, city, pageable);
+        String query = keyword != null ? keyword : legacyTitle;
+
+        Page<Course> courses = courseService.searchCourses(query, category, city, pageable);
         return ResponseEntity.ok(courses);
     }
 

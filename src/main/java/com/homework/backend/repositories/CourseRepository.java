@@ -11,4 +11,5 @@ import java.util.List;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Long>, JpaSpecificationExecutor<Course> {
     List<Course> findByTeacher(User teacher);
+    long countByTeacherId(Long teacherId);
 }
