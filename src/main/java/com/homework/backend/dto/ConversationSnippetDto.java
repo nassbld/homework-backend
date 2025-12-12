@@ -21,6 +21,8 @@ public record ConversationSnippetDto(
         String lastMessageContent,
 
         @NotNull
-        LocalDateTime lastMessageTimestamp
+        LocalDateTime lastMessageTimestamp,
+
+        Long lastMessageSenderId
 ) {
 }

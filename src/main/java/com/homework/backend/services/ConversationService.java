@@ -47,7 +47,8 @@ public class ConversationService {
                             otherUser.getLastName(),
                             otherUser.getId(),
                             lastMessage != null ? lastMessage.getContent() : "Début de la conversation",
-                            lastMessage != null ? lastMessage.getTimestamp() : null // ou la date de création de la conv
+                            lastMessage != null ? lastMessage.getTimestamp() : null, // ou la date de création de la conv
+                            lastMessage != null ? lastMessage.getSender().getId() : null
                     );
                 })
                 // Optionnel : trier pour avoir les plus récentes en premier

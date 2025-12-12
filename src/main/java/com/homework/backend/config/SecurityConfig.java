@@ -77,11 +77,15 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        if (frontendUrl == null || frontendUrl.isEmpty()) {
+            frontendUrl = "http://localhost:5173";
+        }
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(frontendUrl, "http://localhost"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
