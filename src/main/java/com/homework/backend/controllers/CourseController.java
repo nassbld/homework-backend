@@ -17,7 +17,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/courses")
+@RequestMapping("/courses")
 public class CourseController {
 
     private final CourseService courseService;
@@ -32,7 +32,7 @@ public class CourseController {
                                                @AuthenticationPrincipal User currentUser) {
         Course savedCourse = courseService.createCourse(courseRequest, currentUser);
         return ResponseEntity
-                .created(URI.create("/api/courses/" + savedCourse.getId()))
+                .created(URI.create("/courses/" + savedCourse.getId()))
                 .body(savedCourse);
     }
 
