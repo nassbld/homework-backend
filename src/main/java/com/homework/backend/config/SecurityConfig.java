@@ -79,15 +79,32 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
         String frontendUrl = System.getenv("FRONTEND_URL");
-        if (frontendUrl == null || frontendUrl.isEmpty()) {
-            frontendUrl = "http://localhost:5173";
+
+        java.util.List<String> allowedOrigins = new java.util.ArrayList<>();
+        allowedOrigins.add("http://localhost:5173");
+        allowedOrigins.add("http://localhost:3000");
+
+        if (frontendUrl != null && !frontendUrl.isEmpty()) {
+            allowedOrigins.add(frontendUrl);
         }
 
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontendUrl, "http://localhost"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedOrigins(allowedOrigins);
+
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "X-Requested-With",
+                "Accept",
+                "Origin",
+                "Access-Control-Request-Method",
+                "Access-Control-Request-Headers"
+        ));
+
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
