@@ -42,7 +42,10 @@ public class SecurityConfig {
         http
                 .securityMatcher("/login/oauth2/**", "/oauth2/**")
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
+                        .anyRequest().authenticated()
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
                         .successHandler(oauth2AuthenticationSuccessHandler)
