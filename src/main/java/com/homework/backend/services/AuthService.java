@@ -6,12 +6,15 @@ import com.homework.backend.models.EmailVerificationToken;
 import com.homework.backend.models.User;
 import com.homework.backend.repositories.EmailVerificationTokenRepository;
 import com.homework.backend.repositories.UserRepository;
+import jakarta.transaction.Transactional;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class AuthService {
@@ -32,7 +35,7 @@ public class AuthService {
         this.emailVerificationTokenRepository = emailVerificationTokenRepository;
     }
 
-    public User register(RegisterRequest registerRequest) {
+    public CompletableFuture<User> register(RegisterRequest registerRequest) {
         if (userRepository.findByEmail(registerRequest.email()).isPresent()) {
             throw new IllegalArgumentException("Un utilisateur avec cet email existe déjà.");
         }
@@ -48,7 +51,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(user);
 
-        // Generate verification token and send email
+        // Token dans transaction DB
         String token = UUID.randomUUID().toString();
         EmailVerificationToken verificationToken = EmailVerificationToken.builder()
                 .token(token)
@@ -57,10 +60,12 @@ public class AuthService {
                 .build();
         emailVerificationTokenRepository.save(verificationToken);
 
-        emailService.sendVerificationEmail(savedUser.getEmail(), token, savedUser.getFirstName());
+        // ✅ EMAIL ASYNC (non-bloquant)
+        sendVerificationEmailAsync(savedUser.getEmail(), token, savedUser.getFirstName());
 
-        return savedUser;
+        return CompletableFuture.completedFuture(savedUser);
     }
+
 
     public String login(LoginRequest loginRequest) {
         User user = userRepository.findByEmail(loginRequest.email())
@@ -80,6 +85,8 @@ public class AuthService {
         return jwtService.generateToken(user);
     }
 
+    @Async
+    @Transactional
     public void verifyEmail(String token) {
         EmailVerificationToken verificationToken = emailVerificationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Token de vérification invalide."));
@@ -108,5 +115,18 @@ public class AuthService {
         // Mark token as used
         verificationToken.setUsed(true);
         emailVerificationTokenRepository.save(verificationToken);
+    }
+
+    @Async("emailExecutor")  // ✅ Thread dédié, non-bloquant
+    public CompletableFuture<Void> sendVerificationEmailAsync(String email, String token, String firstName) {
+        return CompletableFuture.runAsync(() -> {
+            try {
+                emailService.sendVerificationEmail(email, token, firstName);
+            } catch (Exception e) {
+                // Log erreur mais ne crash pas
+                System.err.println("Email échoué pour " + email + ": " + e.getMessage());
+                // Option : retry ou queue
+            }
+        });
     }
 }

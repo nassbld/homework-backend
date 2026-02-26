@@ -25,13 +25,17 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
-            User newUser = authService.register(registerRequest);
-            // On ne renvoie jamais l'entité complète avec le mot de passe hashé.
-            // Pour l'instant, un simple message suffit. Plus tard, on renverra un DTO de réponse.
-            return ResponseEntity.status(HttpStatus.CREATED).body("Utilisateur enregistré avec succès ! ID : " + newUser.getId());
+            // ✅ Await le CompletableFuture (bloque seulement le thread contrôleur)
+            User newUser = authService.register(registerRequest).join();
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body("Utilisateur enregistré avec succès ! ID : " + newUser.getId() +
+                            ". Vérifiez votre email pour confirmation.");
         } catch (IllegalArgumentException e) {
-            // Gérer le cas où l'email existe déjà
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Erreur lors de l'inscription : " + e.getMessage());
         }
     }
 
