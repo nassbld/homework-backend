@@ -46,7 +46,7 @@ public class AuthService {
                 .email(registerRequest.email())
                 .password(passwordEncoder.encode(registerRequest.password()))
                 .role(registerRequest.role())
-                .verifiedEmail(false)
+                .verifiedEmail(true) // Temporaire car Render bloque l'envoi d'emails de confirmation
                 .build();
 
         User savedUser = userRepository.save(user);
